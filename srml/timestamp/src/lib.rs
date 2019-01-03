@@ -51,7 +51,7 @@ extern crate srml_system as system;
 extern crate srml_consensus as consensus;
 extern crate parity_codec as codec;
 
-use codec::HasCompact;
+use substrate_metadata::HasCompactMetadata;
 use runtime_support::{StorageValue, Parameter};
 use runtime_primitives::CheckInherentError;
 use runtime_primitives::traits::{
@@ -98,7 +98,7 @@ decl_module! {
 		/// if this call hasn't been invoked by that time.
 		///
 		/// The timestamp should be greater than the previous one by the amount specified by `block_period`.
-		fn set(origin, now: <T::Moment as HasCompact>::Type) {
+		fn set(origin, now: <T::Moment as HasCompactMetadata>::Type) {
 			ensure_inherent(origin)?;
 			let now = now.into();
 

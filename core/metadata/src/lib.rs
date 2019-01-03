@@ -14,6 +14,7 @@ extern crate serde;
 extern crate serde_derive;
 
 use rstd::prelude::*;
+use parity_codec::*;
 
 #[cfg(feature = "std")]
 type StringBuf = String;
@@ -299,4 +300,27 @@ impl parity_codec::Encode for Metadata {
 	fn encode_to<EncOut: parity_codec::Output>(&self, dest: &mut EncOut) {
 		dest.push(&self.kind);
 	}
+}
+
+#[cfg(feature = "std")]
+pub trait MaybeDebugSerde: ::std::fmt::Debug + ::serde::Serialize + for<'a> ::serde::Deserialize<'a> {}
+#[cfg(feature = "std")]
+impl<T> MaybeDebugSerde for T where T: ::std::fmt::Debug + ::serde::Serialize + for<'a> ::serde::Deserialize<'a> {}
+
+#[cfg(not(feature = "std"))]
+pub trait MaybeDebugSerde {}
+#[cfg(not(feature = "std"))]
+impl<T> MaybeDebugSerde for T {}
+
+pub trait HasCompactMetadata: Sized {
+	/// The compact type; this can be
+	type Type: for<'a> EncodeAsRef<'a, Self> + Decode + Into<Self> + Clone +
+		PartialEq + Eq + MaybeDebugSerde + EncodeMetadata;
+}
+
+impl<T: 'static> HasCompactMetadata for T where
+	Compact<T>: for<'a> EncodeAsRef<'a, T> + Decode + Into<Self> + Clone +
+		PartialEq + Eq + MaybeDebugSerde + EncodeMetadata,
+{
+	type Type = Compact<T>;
 }
