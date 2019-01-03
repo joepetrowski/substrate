@@ -5,7 +5,7 @@ authors = ["Parity Technologies <admin@parity.io>"]
 description = "Aura consensus algorithm for substrate"
 
 [dependencies]
-parity-codec = "2.1"
+parity-codec = { git = "https://github.com/paritytech/parity-codec.git" }
 substrate-client = { path = "../../client" }
 substrate-primitives = { path = "../../primitives" }
 srml-support = { path = "../../../srml/support" }

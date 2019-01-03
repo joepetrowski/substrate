@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Bryan Chen <xlchen1291@gmail.com>"]
 
 [dependencies]
-parity-codec = { version = "2.1", default-features = false }
+parity-codec = { git = "https://github.com/paritytech/parity-codec.git", default-features = false }
 parity-codec-derive = { version = "2.1", default-features = false }
 serde = { version = "1.0", default-features = false }
 serde_derive = { version = "1.0", optional = true }

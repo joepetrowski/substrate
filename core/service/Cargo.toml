@@ -25,7 +25,7 @@ substrate-consensus-aura-primitives = { path = "../../core/consensus/aura/primit
 substrate-network = { path = "../../core/network" }
 substrate-client = { path = "../../core/client" }
 substrate-client-db = { path = "../../core/client/db" }
-parity-codec = "2.1"
+parity-codec = { git = "https://github.com/paritytech/parity-codec.git" }
 substrate-executor = { path = "../../core/executor" }
 substrate-transaction-pool = { path = "../../core/transaction-pool" }
 substrate-rpc-servers = { path = "../../core/rpc-servers" }

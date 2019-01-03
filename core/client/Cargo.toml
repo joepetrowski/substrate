@@ -21,7 +21,7 @@ substrate-telemetry = { path = "../telemetry", optional = true }
 hash-db = { git = "https://github.com/paritytech/trie", optional = true }
 kvdb = { git = "https://github.com/paritytech/parity-common", optional = true, rev="616b40150ded71f57f650067fcbc5c99d7c343e6" }
 
-parity-codec = { version = "2.1", default-features = false }
+parity-codec = { git = "https://github.com/paritytech/parity-codec.git", default-features = false }
 substrate-primitives = { path = "../primitives", default-features = false }
 sr-primitives = { path = "../sr-primitives", default-features = false }
 sr-version = { path = "../sr-version", default-features = false }

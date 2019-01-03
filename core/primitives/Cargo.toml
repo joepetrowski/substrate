@@ -6,7 +6,7 @@ authors = ["Parity Technologies <admin@parity.io>"]
 [dependencies]
 crunchy = { version = "0.2", default-features = false }
 sr-std = { path = "../sr-std", default-features = false }
-parity-codec = { version = "2.1", default-features = false }
+parity-codec = { git = "https://github.com/paritytech/parity-codec.git", default-features = false }
 parity-codec-derive = { version = "2.1", default-features = false }
 fixed-hash = { version = "0.3.0", default-features = false }
 rustc-hex = { version = "2.0", default-features = false }
