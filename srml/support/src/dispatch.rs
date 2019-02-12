@@ -605,29 +605,37 @@ macro_rules! decl_module {
 			}
 		)*
 
-		#[cfg(feature = "std")]
-		$(#[$attr])*
-		#[derive(EncodeMetadata)]
-		pub enum $call_type<$trait_instance: $trait_name> {
-			__PhantomItem(::std::marker::PhantomData<$trait_instance>),
-			__OtherPhantomItem(::std::marker::PhantomData<$trait_instance>),
-			$(
-				#[allow(non_camel_case_types)]
-				$fn_name ( $( $param ),* ),
-			)*
+		// workaround of #[derive($crate::substrate_metadata_derive::EncodeMetadata)] not working on rust stable issue
+		mod _decl_module_with_encode_metadata {
+			use super::*;
+			use $crate::substrate_metadata_derive::EncodeMetadata;
+
+			#[cfg(feature = "std")]
+			$(#[$attr])*
+			#[derive(EncodeMetadata)]
+			pub enum $call_type<$trait_instance: $trait_name> {
+				__PhantomItem(::std::marker::PhantomData<$trait_instance>),
+				__OtherPhantomItem(::std::marker::PhantomData<$trait_instance>),
+				$(
+					#[allow(non_camel_case_types)]
+					$fn_name ( $( $param ),* ),
+				)*
+			}
+
+			#[cfg(not(feature = "std"))]
+			$(#[$attr])*
+			#[derive(EncodeMetadata)]
+			pub enum $call_type<$trait_instance: $trait_name> {
+				__PhantomItem(::core::marker::PhantomData<$trait_instance>),
+				__OtherPhantomItem(::core::marker::PhantomData<$trait_instance>),
+				$(
+					#[allow(non_camel_case_types)]
+					$fn_name ( $( $param ),* ),
+				)*
+			}
 		}
 
-		#[cfg(not(feature = "std"))]
-		$(#[$attr])*
-		#[derive(EncodeMetadata)]
-		pub enum $call_type<$trait_instance: $trait_name> {
-			__PhantomItem(::core::marker::PhantomData<$trait_instance>),
-			__OtherPhantomItem(::core::marker::PhantomData<$trait_instance>),
-			$(
-				#[allow(non_camel_case_types)]
-				$fn_name ( $( $param ),* ),
-			)*
-		}
+		pub use _decl_module_with_encode_metadata::$call_type;
 
 		// manual implementation of clone/eq/partialeq because using derive erroneously requires
 		// clone/eq/partialeq from T.
@@ -881,14 +889,22 @@ macro_rules! impl_outer_dispatch {
 			)*
 		}
 	) => {
-		$(#[$attr])*
-		#[derive(Clone, PartialEq, Eq, EncodeMetadata)]
-		#[cfg_attr(feature = "std", derive(Debug))]
-		pub enum $call_type {
-			$(
-				$camelcase ( $crate::dispatch::CallableCallFor<$camelcase> )
-			,)*
+		// workaround of #[derive($crate::substrate_metadata_derive::EncodeMetadata)] not working on rust stable issue
+		mod _impl_outer_dispatch_with_encode_metadata {
+			use super::*;
+			use $crate::substrate_metadata_derive::EncodeMetadata;
+
+			$(#[$attr])*
+			#[derive(Clone, PartialEq, Eq, EncodeMetadata)]
+			#[cfg_attr(feature = "std", derive(Debug))]
+			pub enum $call_type {
+				$(
+					$camelcase ( $crate::dispatch::CallableCallFor<$camelcase> )
+				,)*
+			}
 		}
+		pub use _impl_outer_dispatch_with_encode_metadata::$call_type;
+
 		$crate::__impl_outer_dispatch_common! { $call_type, $($camelcase,)* }
 		impl $crate::dispatch::Dispatchable for $call_type {
 			type Origin = $origin;

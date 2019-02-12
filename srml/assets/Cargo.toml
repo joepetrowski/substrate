@@ -15,7 +15,6 @@ srml-support = { path = "../support", default-features = false }
 # `system` module provides us with all sorts of useful stuff and macros depend on it being around.
 system = { package = "srml-system", path = "../system", default-features = false }
 substrate-metadata = { path = "../../core/metadata", default-features = false }
-substrate-metadata-derive = { path = "../../core/metadata-derive", default-features = false }
 
 [dev-dependencies]
 substrate-primitives = { path = "../../core/primitives", default-features = false }
@@ -31,5 +30,4 @@ std = [
 	"srml-support/std",
 	"system/std",
 	"substrate-metadata/std",
-	"substrate-metadata-derive/std",
 ]
