@@ -33,8 +33,16 @@ pub type StringBuf = &'static str;
 #[cfg_attr(feature = "std", derive(Decode, Debug, Serialize))]
 pub enum MetadataName {
 	Unknown,
+
+	// substrate metadata types
+	MetadataName,
+	MetadataRegistry,
+
+	// custom types
 	Custom(StringBuf, StringBuf),
 	CustomWithGenerics(StringBuf, StringBuf, Vec<MetadataName>),
+
+	// build-in types
 	Array(u16, Box<MetadataName>),
 	Vector(Box<MetadataName>),
 	Tuple(Vec<MetadataName>),
@@ -135,6 +143,8 @@ impl_primitives!(
 	H160 => MetadataName::H160,
 	H256 => MetadataName::H256,
 	H512 => MetadataName::H512,
+	MetadataName => MetadataName::MetadataName,
+	MetadataRegistry => MetadataName::MetadataRegistry,
 );
 
 macro_rules! impl_array {

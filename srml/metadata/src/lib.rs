@@ -32,7 +32,8 @@ use parity_codec::{Encode, Output};
 use parity_codec_derive::Encode;
 use rstd::vec::Vec;
 
-use substrate_metadata::MetadataName;
+use substrate_metadata::{EncodeMetadata, MetadataName, MetadataRegistry, TypeMetadataKind};
+use substrate_metadata_derive::EncodeMetadata;
 
 #[cfg(feature = "std")]
 type StringBuf = String;
@@ -118,6 +119,19 @@ impl<B, O> serde::Serialize for DecodeDifferent<B, O>
 	}
 }
 
+impl<B, O> EncodeMetadata for DecodeDifferent<B, O>
+	where
+		B: EncodeMetadata
+{
+	fn type_name() -> MetadataName {
+		B::type_name()
+	}
+
+	fn type_metadata_kind(registry: &mut MetadataRegistry) -> TypeMetadataKind {
+		B::type_metadata_kind(registry)
+	}
+}
+
 pub type DecodeDifferentArray<B, O=B> = DecodeDifferent<&'static [B], Vec<O>>;
 
 #[cfg(feature = "std")]
@@ -126,7 +140,7 @@ type DecodeDifferentStr = DecodeDifferent<&'static str, StringBuf>;
 type DecodeDifferentStr = DecodeDifferent<&'static str, StringBuf>;
 
 /// All the metadata about a function.
-#[derive(Clone, PartialEq, Eq, Encode)]
+#[derive(Clone, PartialEq, Eq, Encode, EncodeMetadata)]
 #[cfg_attr(feature = "std", derive(Decode, Debug, Serialize))]
 pub struct FunctionMetadata {
 	pub name: DecodeDifferentStr,
@@ -135,7 +149,7 @@ pub struct FunctionMetadata {
 }
 
 /// All the metadata about a function argument.
-#[derive(Clone, PartialEq, Eq, Encode)]
+#[derive(Clone, PartialEq, Eq, Encode, EncodeMetadata)]
 #[cfg_attr(feature = "std", derive(Decode, Debug, Serialize))]
 pub struct FunctionArgumentMetadata {
 	pub name: DecodeDifferentStr,
@@ -144,7 +158,7 @@ pub struct FunctionArgumentMetadata {
 
 /// Newtype wrapper for support encoding functions (actual the result of the function).
 #[derive(Clone, Eq)]
-pub struct FnEncode<E>(pub fn() -> E) where E: Encode + 'static;
+pub struct FnEncode<E>(pub fn() -> E) where E: Encode + 'static + EncodeMetadata;
 
 impl<E: Encode> Encode for FnEncode<E> {
 	fn encode_to<W: Output>(&self, dest: &mut W) {
@@ -175,6 +189,16 @@ impl<E: Encode + serde::Serialize> serde::Serialize for FnEncode<E> {
 	}
 }
 
+impl<E: EncodeMetadata> EncodeMetadata for FnEncode<E> {
+	fn type_name() -> MetadataName {
+		E::type_name()
+	}
+
+	fn type_metadata_kind(registry: &mut MetadataRegistry) -> TypeMetadataKind {
+		E::type_metadata_kind(registry)
+	}
+}
+
 /// All the metadata about an outer event.
 #[derive(Clone, PartialEq, Eq, Encode)]
 #[cfg_attr(feature = "std", derive(Decode, Debug, Serialize))]
@@ -187,7 +211,7 @@ pub struct OuterEventMetadata {
 }
 
 /// All the metadata about a event.
-#[derive(Clone, PartialEq, Eq, Encode)]
+#[derive(Clone, PartialEq, Eq, Encode, EncodeMetadata)]
 #[cfg_attr(feature = "std", derive(Decode, Debug, Serialize))]
 pub struct EventMetadata {
 	pub name: DecodeDifferentStr,
@@ -196,7 +220,7 @@ pub struct EventMetadata {
 }
 
 /// All the metadata about a storage function.
-#[derive(Clone, PartialEq, Eq, Encode)]
+#[derive(Clone, PartialEq, Eq, Encode, EncodeMetadata)]
 #[cfg_attr(feature = "std", derive(Decode, Debug, Serialize))]
 pub struct StorageFunctionMetadata {
 	pub name: DecodeDifferentStr,
@@ -252,7 +276,7 @@ impl std::fmt::Debug for DefaultByteGetter {
 }
 
 /// A storage function type.
-#[derive(Clone, PartialEq, Eq, Encode)]
+#[derive(Clone, PartialEq, Eq, Encode, EncodeMetadata)]
 #[cfg_attr(feature = "std", derive(Decode, Debug, Serialize))]
 pub enum StorageFunctionType {
 	Plain(MetadataName),
@@ -263,7 +287,7 @@ pub enum StorageFunctionType {
 }
 
 /// A storage function modifier.
-#[derive(Clone, PartialEq, Eq, Encode)]
+#[derive(Clone, PartialEq, Eq, Encode, EncodeMetadata)]
 #[cfg_attr(feature = "std", derive(Decode, Debug, Serialize))]
 pub enum StorageFunctionModifier {
 	Optional,
@@ -271,7 +295,7 @@ pub enum StorageFunctionModifier {
 }
 
 /// All metadata about the outer dispatch.
-#[derive(Clone, PartialEq, Eq, Encode)]
+#[derive(Clone, PartialEq, Eq, Encode, EncodeMetadata)]
 #[cfg_attr(feature = "std", derive(Decode, Debug, Serialize))]
 pub struct OuterDispatchMetadata {
 	pub name: DecodeDifferentStr,
@@ -279,7 +303,7 @@ pub struct OuterDispatchMetadata {
 }
 
 /// A Call from the outer dispatch.
-#[derive(Clone, PartialEq, Eq, Encode)]
+#[derive(Clone, PartialEq, Eq, Encode, EncodeMetadata)]
 #[cfg_attr(feature = "std", derive(Decode, Debug, Serialize))]
 pub struct OuterDispatchCall {
 	pub name: DecodeDifferentStr,
@@ -326,12 +350,21 @@ impl Decode for RuntimeMetadataDeprecated {
 #[derive(Eq, Encode, PartialEq)]
 #[cfg_attr(feature = "std", derive(Decode, Debug, Serialize))]
 pub struct RuntimeMetadataV2 {
-	pub modules: Vec<ModuleMetadata>,
+	/// Describes how to decode runtime metadata
+	pub metadata_type: substrate_metadata::MetadataRegistry,
+	/// Metadata about the runtime
+	pub metadata: RuntimeMetadataDetails,
+}
+
+#[derive(Eq, Encode, PartialEq, EncodeMetadata)]
+#[cfg_attr(feature = "std", derive(Decode, Debug, Serialize))]
+pub struct RuntimeMetadataDetails {
 	pub type_registry: substrate_metadata::MetadataRegistry,
+	pub modules: Vec<ModuleMetadata>,
 }
 
 /// All metadata about an runtime module.
-#[derive(Clone, PartialEq, Eq, Encode)]
+#[derive(Clone, PartialEq, Eq, Encode, , EncodeMetadata)]
 #[cfg_attr(feature = "std", derive(Decode, Debug, Serialize))]
 pub struct ModuleMetadata {
 	pub name: DecodeDifferentStr,
