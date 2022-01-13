@@ -1434,11 +1434,11 @@ where
 		);
 
 		// make sure that slot number is strictly increasing
-		if slot <= parent_slot {
-			return Err(ConsensusError::ClientImport(
-				babe_err(Error::<Block>::SlotMustIncrease(parent_slot, slot)).into(),
-			))
-		}
+		// if slot <= parent_slot {
+		// 	return Err(ConsensusError::ClientImport(
+		// 		babe_err(Error::<Block>::SlotMustIncrease(parent_slot, slot)).into(),
+		// 	))
+		// }
 
 		// if there's a pending epoch we'll save the previous epoch changes here
 		// this way we can revert it if there's any error
