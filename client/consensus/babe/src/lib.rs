@@ -833,19 +833,19 @@ where
 	}
 
 	fn should_backoff(&self, slot: Slot, chain_head: &B::Header) -> bool {
-		if let Some(ref strategy) = self.backoff_authoring_blocks {
-			if let Ok(chain_head_slot) =
-				find_pre_digest::<B>(chain_head).map(|digest| digest.slot())
-			{
-				return strategy.should_backoff(
-					*chain_head.number(),
-					chain_head_slot,
-					self.client.info().finalized_number,
-					slot,
-					self.logging_target(),
-				)
-			}
-		}
+		// if let Some(ref strategy) = self.backoff_authoring_blocks {
+		// 	if let Ok(chain_head_slot) =
+		// 		find_pre_digest::<B>(chain_head).map(|digest| digest.slot())
+		// 	{
+		// 		return strategy.should_backoff(
+		// 			*chain_head.number(),
+		// 			chain_head_slot,
+		// 			self.client.info().finalized_number,
+		// 			slot,
+		// 			self.logging_target(),
+		// 		)
+		// 	}
+		// }
 		false
 	}
 
